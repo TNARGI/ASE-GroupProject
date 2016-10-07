@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">GeoLocationFromScratch</string>
+    <string name="button">Get Location</string>
+    <string name="text_view_latitude">Latitude: </string>
+    <string name="text_view_longitude">Longitude: </string>
+</resources>
