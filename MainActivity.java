@@ -1,10 +1,15 @@
 package com.example.toshiba.geolocationfromscratch2;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,16 +21,13 @@ public class MainActivity extends AppCompatActivity
 {
 
     ////// Creating variables for the Button and TextViews
-    private Button button;
-    private TextView textView;
-
+    private TextView textView1;
+    private TextView textView2;
 
 
     ////// Creating variables for the location data. Don't fully understand the location classes.
     private LocationManager locationManager;
     private LocationListener locationListener;
-
-
 
 
     ////// Method called upon starting the app for the first time or after it was destroyed
@@ -36,25 +38,91 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
 
-        ////// Casting variables button and textView onto XML equivalent widgets
-        button = (Button) findViewById(R.id.button);
-        textView = (TextView) findViewById(R.id.text_view);
+        ////// Casting textViews onto XML equivalent widgets
+        textView1 = (TextView) findViewById(R.id.text_view1);
+        textView2 = (TextView) findViewById(R.id.text_view2);
 
 
         // Instantiating the locationManager
         locationManager = (LocationManager) MainActivity.this.getSystemService(MainActivity.this.LOCATION_SERVICE);
 
+        //initialising location display
+        Location location = new Location(locationManager.getLastKnownLocation("gps"));
+        textView1.setText("Latitude: " + location.getLatitude());
+        textView2.setText("Longitude: " + location.getLongitude());
 
-        // Method to check if location data is enabled and offering the option to turn it on
+
+        // Method to check if location data is enabled and offering
+        // the option to turn it on using the showAlert method
         isLocationEnabled();
 
 
-        // Method to configure the button widget's onClick effects
-        configureButton();
+
+
+
+        // Instantiating the locationListener
+        locationListener = new LocationListener()
+        {
+            @Override
+            public void onLocationChanged(Location location)
+            {
+                textView1.setText("Latitude: "+location.getLatitude());
+                textView2.setText("Longitude: "+location.getLongitude());
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras)
+            {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider)
+            {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider)
+            {
+
+            }
+        }; // End of locationListener
+
+
+
+
+
+
+
+
+
+
+
+        ////// Requesting location permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            {
+                requestPermissions(new String[]
+                        {
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.INTERNET,
+                        }, 10);
+                return;
+            }
+        }
+
+
+
+        ////// Requesting location updates
+        locationManager.requestLocationUpdates("gps", 1000, 0, locationListener);
+
+
 
 
     } // End of onCreate
-
 
 
 
@@ -76,9 +144,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-
-
-    ///// Give user the ability to turn on 'location' settings
+    ///// Give user the ability to turn on location data settings
     // Method Works
     private void showAlert()
     {
@@ -103,22 +169,6 @@ public class MainActivity extends AppCompatActivity
         });
         dialog.show();
     } // End of showAlert
-
-
-
-    ////// Configuring the Button's function
-    public void configureButton()
-    {
-        button.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
-            }
-        });
-
-    }
 
 
 
