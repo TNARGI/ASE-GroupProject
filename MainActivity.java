@@ -76,9 +76,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 latitude.setText("Latitude: " + lat);
                 longitude.setText("Longitude: " + lon);
 
-                String sLat = Double.toString(lat);
-                String sLon = Double.toString(lon);
+                //String sLat = Double.toString(lat);
+                //String sLon = Double.toString(lon);
 
+                /*
                 try
                 {
                     sendRecord(sLat,sLon);
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //Timestamp date = new Timestamp();
 
                 //Toast.makeText(MainActivity.this,date.getDate(),Toast.LENGTH_LONG).show();
-
+                */
             }
 
             @Override
@@ -195,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-
+    /*
     public void sendRecord(String sendLongitude, String sendLatitude) throws Exception {
         String phoneTime = Long.toString(System.currentTimeMillis());
         System.out.println("################################\n"+phoneTime+"\n############################");
@@ -219,5 +220,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(MainActivity.this, "Couldn't get I/O for the connection to " + hostName, Toast.LENGTH_LONG).show();
         }
     }
+    */
 
 } // End of MainActivity
