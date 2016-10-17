@@ -2,12 +2,14 @@ package com.example.toshiba.locationfinder;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -23,12 +25,21 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback
 {
 
-    private MapFragment map;
-    private GoogleMap myMap;
-
+    ////// Create variables for xml widgets
+    private MapFragment fragmentMap;
+    private GoogleMap googleMap;
     private TextView latitude;
     private TextView longitude;
 
@@ -39,14 +50,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //checkRationale();
 
+        ////// Cast variables onto layout xml
         latitude = (TextView) findViewById(R.id.latitude);
         longitude = (TextView) findViewById(R.id.longitude);
+        fragmentMap = (MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment);
 
-        map = (MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment);
-        map.getMapAsync(this);
+        ////// Initialise the map
+        fragmentMap.getMapAsync(this);
 
+
+
+        ////// Create a LocationManager and LocationListener for location updates
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         LocationListener listener = new LocationListener()
         {
@@ -58,8 +73,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 double lon = loc.getLongitude();
                 addMapMarker(lat, lon);
 
-                latitude.setText("" + loc.getLatitude());
-                longitude.setText("" + loc.getLongitude());
+                latitude.setText("Latitude: " + lat);
+                longitude.setText("Longitude: " + lon);
+
+                String sLat = Double.toString(lat);
+                String sLon = Double.toString(lon);
+
+                try
+                {
+                    sendRecord(sLat,sLon);
+                } catch (Exception e)
+                {
+                   Toast.makeText(MainActivity.this, "i am error", Toast.LENGTH_LONG).show();
+                }
+
+                //Timestamp date = new Timestamp();
+
+                //Toast.makeText(MainActivity.this,date.getDate(),Toast.LENGTH_LONG).show();
+
             }
 
             @Override
@@ -75,35 +106,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onProviderDisabled(String s)
             {
+                /*
+                final AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+
+                dialog.setTitle("Enable Location Data")
+                        .setMessage("Location data has disabled.\nPlease enable location data to use this app.")
+                        .setPositiveButton("Go to Location Settings", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt)
+                            {
+                                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(intent);
+                            }
+                        });
+                dialog.show();
+                */
             }
         };
 
 
-        /*
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED)
-        {
-
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                    PackageManager.PERMISSION_GRANTED)
-            {
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET}
-                            , 10);
-                }
-            }
-            return;
-        }
-        */
 
 
+
+        ////// Check if location permission has been given and request if not
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             makeRequest();
             return;
         }
+
+
+
+        ////// Request location updates from the LocationManager after location permission has been given
         locationManager.requestLocationUpdates("gps", 2000, 0, listener);
 
 
@@ -113,113 +148,76 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-
-
+    ////// Add a map marker and zoom to current location
     void addMapMarker(Double latitude, Double longitude)
     {
-        myMap.clear();
+        googleMap.clear();
         LatLng loc = new LatLng(latitude,longitude);
-        myMap.addMarker(new MarkerOptions().position(loc).title("current location"));
-        myMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
-    }
+        googleMap.addMarker(new MarkerOptions().position(loc).title("current location"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 12));
+    } // End of addMapMarker
 
 
 
 
 
-
-
+    ////// Called automatically when the map is ready to use
     @Override
-    public void onMapReady(GoogleMap myMap)
+    public void onMapReady(GoogleMap googleMap)
     {
-        this.myMap  = myMap;
-    }
-
-
-
-    public void checkRationale()
-    {
-
-        /*
-        int permission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
-        // Automatically calls onRequestPermissionResults
-        */
-
-
-        /*
-        int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if(permission != PackageManager.PERMISSION_GRANTED)
-        {
-            makeRequest();
-        }
-        */
+        this.googleMap  = googleMap;
+    } // End of onMapReady
 
 
 
 
-
-        /*
-        if (permission != PackageManager.PERMISSION_GRANTED)
-        {
-
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION ))
-            {
-                Log.d("MainActivity", "Should show permission rationale");
-                Toast.makeText(MainActivity.this, "Show rationale", Toast.LENGTH_SHORT);
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("You must grant permission to access your location.").setTitle("Permission required");
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id)
-                    {
-                        makeRequest();
-                    }
-                });
-                builder.setNegativeButton("DENY ACCESS\n(currently pointless)", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id)
-                    {
-                        finish();
-                    }
-                });
-
-                //builder.create().show();
-
-            }
-            else
-            {
-                makeRequest();
-            }
-        }
-        */
-
-    }
-
-
-
+    ////// Request location permission
     protected void makeRequest()
     {
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 2);
-    }
+    } // End of makeRequest
 
 
 
-
-
-
+    ////// Called automatically upon permission request response
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
     {
         if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED)
         {
-            Toast.makeText(this, "Application will terminate. You did not grant permission. ", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Application cannot function without location permission.\n\nApplication terminated.", Toast.LENGTH_LONG).show();
             finish();
         }
 
         return;
+    } // End of onRequestPermissionResult
+
+
+
+
+    public void sendRecord(String sendLongitude, String sendLatitude) throws Exception {
+        String phoneTime = Long.toString(System.currentTimeMillis());
+        System.out.println("################################\n"+phoneTime+"\n############################");
+        String phoneMac = "0.0.0.8";
+        System.out.println("################################\n"+phoneMac+"\n############################");
+        InetAddress hostName = InetAddress.getByName("10.1.42.254");
+        System.out.println("################################\n"+hostName+"\n############################");
+        int portNumber = 5432;
+        System.out.println("################################\n"+portNumber+"\n############################");
+
+        try (
+                Socket appSocket = new Socket(hostName, portNumber);
+                //PrintWriter out = new PrintWriter(appSocket.getOutputStream(), true);
+        ) {
+            System.out.println("################################\n"+"socket built"+"\n############################");
+            String outString = phoneMac + "\n" + phoneTime + "\n" + sendLatitude + "\n" + sendLongitude;
+                //out.print(outString);
+        } catch (UnknownHostException e) {
+            Toast.makeText(MainActivity.this, "Don't know about host " + hostName, Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(MainActivity.this, "Couldn't get I/O for the connection to " + hostName, Toast.LENGTH_LONG).show();
+        }
     }
 
-
-}
+} // End of MainActivity
