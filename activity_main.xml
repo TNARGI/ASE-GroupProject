@@ -17,13 +17,13 @@
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:id="@+id/latitude"
-        android:hint="Latitude"/>
+        android:hint="@string/latitudeTextView"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:id="@+id/longitude"
-        android:hint="Longitude"/>
+        android:hint="@string/longitudeTextView"/>
 
     <fragment
         class="com.google.android.gms.maps.MapFragment"

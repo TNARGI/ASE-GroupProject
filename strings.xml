@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">LocationFinder</string>
+    <string name="latitudeTextView">Latitude: Finding satellites...</string>
+    <string name="longitudeTextView">Longitude: Finding satellites...</string>
+</resources>
