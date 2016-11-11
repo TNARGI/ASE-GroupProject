@@ -87,10 +87,10 @@ public class Client extends AsyncTask<Void, Void, Void> {
             al.add(in.readLine());
 
             // Print out back end response
-            System.out.println(">>>>>>>"+al.get(0));
-            System.out.println(">>>>>>>"+al.get(1));
-            System.out.println(">>>>>>>"+al.get(2));
-            System.out.println(">>>>>>>"+al.get(3));
+            System.out.println(">>>>>>>" + al.get(0));
+            System.out.println(">>>>>>>" + al.get(1));
+            System.out.println(">>>>>>>" + al.get(2));
+            System.out.println(">>>>>>>" + al.get(3));
 
 
             // Print out each element of HashMap using an iterator

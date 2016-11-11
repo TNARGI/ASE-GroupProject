@@ -118,8 +118,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Converting back end query results from postcode to lat/lon
                 //Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.getNearbyPostcodes()));
                 //Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.getNearbyPostcodes()));
-                System.out.println(myClient.getNearbyPostcodes());
 
+                System.out.println("NEARBY POSTCODE: >>>>>>>" + myClient.getNearbyPostcodes());
                 //System.out.println("Conversion>>>"+nearbyLat);
                 //System.out.println("Conversion>>>"+nearbyLat);
 
