@@ -31,7 +31,12 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
 
     ////// Create a HashMap to store each of the back end's query results
-    //HashMap hm = new HashMap();
+    HashMap hm = new HashMap();
+
+
+    ////// Create an ArrayList to store each of the back end's query results
+    ArrayList<String> al = new ArrayList<String>();
+
 
 
 
@@ -68,19 +73,27 @@ public class Client extends AsyncTask<Void, Void, Void> {
             out.println(postcode);
 
 
-
-            ////// Receive data from back end
-            System.out.println("*****SYSTEM OUT********---->" + in.readLine() + "<----********SYSTEM OUT****************");
-
-
+            // Store back end response (nearby houses in your current postcode) in HashMap
             //hm.put("PRICE", new String(in.readLine()));
             //hm.put("POSTCODE", new String(in.readLine()));
             //hm.put("ADDRESS", new String(in.readLine()));
             //hm.put("DATE", new String(in.readLine()));
 
 
+            // Store back end response (nearby houses in your current postcode) in ArrayList
+            al.add(in.readLine());
+            al.add(in.readLine());
+            al.add(in.readLine());
+            al.add(in.readLine());
+
+            // Print out back end response
+            System.out.println(">>>>>>>"+al.get(0));
+            System.out.println(">>>>>>>"+al.get(1));
+            System.out.println(">>>>>>>"+al.get(2));
+            System.out.println(">>>>>>>"+al.get(3));
 
 
+            // Print out each element of HashMap using an iterator
             //Set set = hm.entrySet();
             //Iterator i = set.iterator();
 
@@ -90,6 +103,8 @@ public class Client extends AsyncTask<Void, Void, Void> {
             //    System.out.print(me.getKey() + ": ");
             //    System.out.println(me.getValue());
             //}
+
+
 
 
 
@@ -129,12 +144,11 @@ public class Client extends AsyncTask<Void, Void, Void> {
     }
 
 
-    /*
-    public void test()
+    public String getNearbyPostcodes()
     {
-        System.out.println(hm.get("POSTCODE") + "<--******HASHMAP*****");
+        return al.get(1);
     }
-    */
+
 
 
 }
