@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
+    ////// Trial an attribute to identify when the client has finished querying the database
+    private static boolean queryComplete;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -95,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Fetch latitude/longitude and add a map marker
                 double lat = loc.getLatitude();
                 double lon = loc.getLongitude();
-                addMapMarker(lat, lon);
+                //addMapMarker(lat, lon); Commented out to test the map marker for query results
 
 
                 // Set TextView widgets to display coordinates
@@ -108,20 +111,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 // Convert lat/lon to postcode
                 String postcode = getPostcodeFromLatLon(lat, lon);
-                //String postcode1 = "bn1 4ps";
+
+
+
 
                 // Create client to connect to sever
                 Client myClient = new Client("35.160.161.98", 23456, getPhoneMac(), postcode);
                 myClient.execute();
 
 
-                // Converting back end query results from postcode to lat/lon
-                //Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.getNearbyPostcodes()));
-                //Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.getNearbyPostcodes()));
 
-                System.out.println("NEARBY POSTCODE: >>>>>>>" + myClient.getNearbyPostcodes());
-                //System.out.println("Conversion>>>"+nearbyLat);
-                //System.out.println("Conversion>>>"+nearbyLat);
+                if(myClient.al.size()== 0)
+                {
+                    System.out.println("||| ARRAY LIST EMPTY |||");
+                }
+                else
+                {
+                    System.out.println("||| ARRAY LIST FULL |||");
+
+                    // Converting back end query results from postcode to lat/lon
+                    Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.al.get(1)));
+                    Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.al.get(1)));
+
+                    System.out.println("Print out a nearby postcode >>>" + myClient.al.get(1));
+                    System.out.println("Conversion to latitude >>>" + nearbyLat);
+                    System.out.println("Conversion to longitude >>>" + nearbyLat);
+
+                    addMapMarker(nearbyLat, nearbyLon);
+
+                }
+
+
+
+
 
             }
 
@@ -171,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         ////// Request location updates from the LocationManager after location permission has been given
-        locationManager.requestLocationUpdates("gps", 10000, 0, listener);
+        locationManager.requestLocationUpdates("gps", 2000, 0, listener);
 
 
 
@@ -367,6 +389,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     // END OF POSTCODE HANDLING METHODS ////////////////////////////////////////////////////////////
+
+
 
 
 } // End of MainActivity

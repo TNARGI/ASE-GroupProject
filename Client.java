@@ -30,12 +30,10 @@ public class Client extends AsyncTask<Void, Void, Void> {
     //TextView textResponse;
 
 
-    ////// Create a HashMap to store each of the back end's query results
-    HashMap hm = new HashMap();
-
 
     ////// Create an ArrayList to store each of the back end's query results
     ArrayList<String> al = new ArrayList<String>();
+
 
 
 
@@ -57,6 +55,8 @@ public class Client extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... arg0) {
 
+
+
         Socket socket = null;
 
         try {
@@ -73,12 +73,6 @@ public class Client extends AsyncTask<Void, Void, Void> {
             out.println(postcode);
 
 
-            // Store back end response (nearby houses in your current postcode) in HashMap
-            //hm.put("PRICE", new String(in.readLine()));
-            //hm.put("POSTCODE", new String(in.readLine()));
-            //hm.put("ADDRESS", new String(in.readLine()));
-            //hm.put("DATE", new String(in.readLine()));
-
 
             // Store back end response (nearby houses in your current postcode) in ArrayList
             al.add(in.readLine());
@@ -86,25 +80,12 @@ public class Client extends AsyncTask<Void, Void, Void> {
             al.add(in.readLine());
             al.add(in.readLine());
 
+
             // Print out back end response
-            System.out.println(">>>>>>>" + al.get(0));
-            System.out.println(">>>>>>>" + al.get(1));
-            System.out.println(">>>>>>>" + al.get(2));
-            System.out.println(">>>>>>>" + al.get(3));
-
-
-            // Print out each element of HashMap using an iterator
-            //Set set = hm.entrySet();
-            //Iterator i = set.iterator();
-
-            //while(i.hasNext())
-            //{
-            //    Map.Entry me = (Map.Entry) i.next();
-            //    System.out.print(me.getKey() + ": ");
-            //    System.out.println(me.getValue());
-            //}
-
-
+            //System.out.println("Client >>>>>>>" + al.get(0));
+            System.out.println("Client >>>>>>>" + al.get(1));
+            //System.out.println("Client >>>>>>>" + al.get(2));
+            //System.out.println("Client >>>>>>>" + al.get(3));
 
 
 
@@ -115,6 +96,8 @@ public class Client extends AsyncTask<Void, Void, Void> {
                 byteArrayOutputStream.write(buffer, 0, bytesRead);
                 //response += byteArrayOutputStream.toString("UTF-8");
             }
+
+
 
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
@@ -141,12 +124,6 @@ public class Client extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void result) {
         //textResponse.setText(response);
         super.onPostExecute(result);
-    }
-
-
-    public String getNearbyPostcodes()
-    {
-        return al.get(1);
     }
 
 
