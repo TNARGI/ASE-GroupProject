@@ -32,7 +32,8 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
 
     ////// Create an ArrayList to store each of the back end's query results
-    ArrayList<String> al = new ArrayList<String>();
+    ArrayList<ArrayList<String>> alal = new ArrayList<>();
+    //ArrayList<String> al = new ArrayList<>();
 
 
 
@@ -75,11 +76,14 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
 
             // Store back end response (nearby houses in your current postcode) in ArrayList
-            al.add(in.readLine());
-            al.add(in.readLine());
-            al.add(in.readLine());
-            al.add(in.readLine());
-
+            while ((userInput = stdIn.readLine()) != null) {
+                ArrayList<String> al = new ArrayList<>();
+                al.add(in.readLine());
+                al.add(in.readLine());
+                al.add(in.readLine());
+                al.add(in.readLine());
+                alal.add(al);
+            }
 
             // Print out back end response
             //System.out.println("Client >>>>>>>" + al.get(0));
