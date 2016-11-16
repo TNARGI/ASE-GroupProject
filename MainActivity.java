@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Client myClient = new Client("35.160.161.98", 23456, getPhoneMac(), postcode);
                 myClient.execute();
 
-
+                Thread.sleep(10000);
 
                 if(myClient.al.size()== 0)
                 {
