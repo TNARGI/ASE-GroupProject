@@ -83,13 +83,12 @@ public class Client extends AsyncTask<Void, Void, Void> {
                 al.add(in.readLine());
                 al.add(in.readLine());
                 alal.add(al);
+                // Print out back end response
+                System.out.println("Client >>>>>>>" + al.get(0));
+                System.out.println("Client >>>>>>>" + al.get(1));
+                System.out.println("Client >>>>>>>" + al.get(2));
+                System.out.println("Client >>>>>>>" + al.get(3));
             }
-
-            // Print out back end response
-            //System.out.println("Client >>>>>>>" + al.get(0));
-            System.out.println("Client >>>>>>>" + al.get(1));
-            //System.out.println("Client >>>>>>>" + al.get(2));
-            //System.out.println("Client >>>>>>>" + al.get(3));
 
 
 
