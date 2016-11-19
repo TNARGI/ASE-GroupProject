@@ -27,6 +27,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.BufferedReader;
@@ -50,16 +51,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap googleMap;
     private TextView latitude;
     private TextView longitude;
-
-    ///// Test Lat and Lon for Mehmet's database
-    //public double tempLat;
-    //public double tempLon;
-
+    //public LatLng globalLoc = new LatLng(0,0);
 
 
     ////// Trial an attribute to identify when the client has finished querying the database
     private static boolean queryComplete;
 
+
+    static String[] arrayOfNearbyPostcodes = new String[0];
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Fetch latitude/longitude and add a map marker
                 double lat = loc.getLatitude();
                 double lon = loc.getLongitude();
-                //addMapMarker(lat, lon); Commented out to test the map marker for query results
+                //addMapMarker(lat, lon); //Commented out to test the map marker for query results
 
 
                 // Set TextView widgets to display coordinates
@@ -113,36 +112,82 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String postcode = getPostcodeFromLatLon(lat, lon);
 
 
-
-
                 // Create client to connect to sever
                 Client myClient = new Client("35.160.161.98", 23456, getPhoneMac(), postcode);
                 myClient.execute();
 
-                Thread.sleep(10000);
 
-                if(myClient.al.size()== 0)
+                try
+                {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+
+
+                if (myClient.alal.size() == 0)
                 {
                     System.out.println("||| ARRAY LIST EMPTY |||");
-                }
-                else
+                } else
                 {
                     System.out.println("||| ARRAY LIST FULL |||");
 
+                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(0));
+                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(1));
+                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(2));
+                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(3));
+
+                    String[] words = new String[5];
+                    //words[0] = "OMNOMNOM";
+                    words[0] = "id";
+                    words[1] = "price";
+                    words[2] = "postcode";
+                    words[3] = "address";
+                    words[4] = "date";
+
+                    String results = new String("");
+
+                    for(int i=0; i < myClient.alal.size(); i++)
+                    {
+
+                        ////// Print out all address elements in a list
+                        for(int j = 0; j < myClient.alal.get(i).size(); j++){
+                            System.out.println(words[j] + ": " + myClient.alal.get(i).get(j));
+                            //results = results + (words[j] + ": " + myClient.alal.get(i).get(j) + "\n");
+                        }
+                    //results = results + "XXXXXXXXXXXXXXXXXXXX \n";
+                        ////// Print out postcodes in a list
+                        //System.out.println("Postcode "+ i + ": " + myClient.alal.get(i).get(2));
+
+                        Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.alal.get(i).get(2)));
+                        Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.alal.get(i).get(2)));
+
+                        //LatLng nearbyLoc = new LatLng(nearbyLat,nearbyLon);
+                        //googleMap.addMarker(new MarkerOptions().position(nearbyLoc).title("" + i));
+                        //globalLoc = nearbyLoc;
+                        //onMapReady(googleMap);
+
+
+                        System.out.println("Lat: " + nearbyLat + "\t" + "Lon: " + nearbyLon);
+                        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^");
+
+                        //addMapMarker(nearbyLat, nearbyLon);
+
+                    }
+                    //longitude.setText("");
+                    //latitude.setText(results);
                     // Converting back end query results from postcode to lat/lon
-                    Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.al.get(1)));
-                    Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.al.get(1)));
+                    //Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.array[1]));
+                    //Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.array[1]));
 
-                    System.out.println("Print out a nearby postcode >>>" + myClient.al.get(1));
-                    System.out.println("Conversion to latitude >>>" + nearbyLat);
-                    System.out.println("Conversion to longitude >>>" + nearbyLat);
+                    //System.out.println("Print out a nearby postcode >>>" + myClient.array[1]);
+                    //System.out.println("Conversion to latitude >>>" + nearbyLat);
+                    //System.out.println("Conversion to longitude >>>" + nearbyLat);
 
-                    addMapMarker(nearbyLat, nearbyLon);
+                    //addMapMarker(nearbyLat, nearbyLon);
 
                 }
-
-
-
 
 
             }
@@ -180,9 +225,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         };
 
 
-
-
-
         ////// Check if location permission has been given, and request if not
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
@@ -191,39 +233,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
-
         ////// Request location updates from the LocationManager after location permission has been given
         locationManager.requestLocationUpdates("gps", 2000, 0, listener);
-
 
 
     } // End of onCreate
 
 
-
-
     ////// Add a map marker and zoom to current location
     void addMapMarker(Double latitude, Double longitude)
     {
-        googleMap.clear();
-        LatLng loc = new LatLng(latitude,longitude);
-        googleMap.addMarker(new MarkerOptions().position(loc).title("current location"));
+        //googleMap.clear();
+        LatLng loc = new LatLng(latitude, longitude);
+        //LatLng foo = new LatLng(0,0);
+        googleMap.addMarker(new MarkerOptions().position(loc).title("current location").visible(true));
+        ////// Temporarily commented out to avoid app trying to zoom and centre on every nearby postcode
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 12));
     } // End of addMapMarker
-
-
-
 
 
     ////// Called automatically when the map is ready to use
     @Override
     public void onMapReady(GoogleMap googleMap)
     {
-        this.googleMap  = googleMap;
+        this.googleMap = googleMap;
+        //googleMap.addMarker(new MarkerOptions().position(new LatLng(0,0)).title("current location"));
     } // End of onMapReady
-
-
 
 
     ////// Request location permission
@@ -231,7 +267,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     {
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 2);
     } // End of makeRequest
-
 
 
     ////// Called automatically upon permission request response
@@ -246,7 +281,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         return;
     } // End of onRequestPermissionResult
-
 
 
     /// Grant's Phone Mac = 02:00:00:00:00:00
@@ -299,8 +333,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     } // End of getPhoneMac
 
 
-
-
     ////// POSTCODE HANDLING METHODS ///////////////////////////////////////////////////////////////
     public String getLatitudeFromPostcode(String postcode)
     {
@@ -313,8 +345,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try
             {
                 address = geoCoder.getFromLocationName(postcode, 10);
-            }
-            catch (IOException e1)
+            } catch (IOException e1)
             {
                 e1.printStackTrace();
             }
@@ -331,8 +362,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     } // End of getLatitudeFromPostcode
 
 
-
-
     public String getLongitudeFromPostcode(String postcode)
     {
         Geocoder geoCoder = new Geocoder(MainActivity.this, Locale.getDefault());
@@ -344,8 +373,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try
             {
                 address = geoCoder.getFromLocationName(postcode, 10);
-            }
-            catch (IOException e1)
+            } catch (IOException e1)
             {
                 e1.printStackTrace();
             }
@@ -359,8 +387,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return returnResult;
     } // End of getLongitudeFromPostcode
-
-
 
 
     public String getPostcodeFromLatLon(double latitude, double longitude)
@@ -389,8 +415,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     // END OF POSTCODE HANDLING METHODS ////////////////////////////////////////////////////////////
-
-
 
 
 } // End of MainActivity
