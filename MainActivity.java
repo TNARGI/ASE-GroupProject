@@ -40,6 +40,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -58,13 +59,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static boolean queryComplete;
 
 
-    static String[] arrayOfNearbyPostcodes = new String[0];
+    ////// Array list to store back end query response - ULTIMATELY USELESS BECAUSE IT ONLY CONTAINS LATLNG ELEMENTS, no prices etc.
+    //private static ArrayList<LatLng> arrayListOfNearbyLatLon = new ArrayList<LatLng>();
+
+
+    ////// Array list to store back end results in full address format
+    public static ArrayList<ArrayList<String>> outerArrayListOfNearbyAddresses = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        //testArrayList.add("Hello");
 
         /*
         System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
@@ -94,10 +104,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onLocationChanged(android.location.Location loc)
             {
+                // Clear nearby location array list
+                outerArrayListOfNearbyAddresses.clear();
+
                 // Fetch latitude/longitude and add a map marker
                 double lat = loc.getLatitude();
                 double lon = loc.getLongitude();
-                //addMapMarker(lat, lon); //Commented out to test the map marker for query results
+                addUserLocMapMarker(new LatLng(lat, lon)); //Commented out to test the map markers for back end query results
 
 
                 // Set TextView widgets to display coordinates
@@ -117,6 +130,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 myClient.execute();
 
 
+                // thread.sleep seemed to be the cause of map marker delay/map freezing
+                /*
                 try
                 {
                     Thread.sleep(10000);
@@ -124,6 +139,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 {
                     e.printStackTrace();
                 }
+                */
+
 
 
                 if (myClient.alal.size() == 0)
@@ -133,10 +150,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 {
                     System.out.println("||| ARRAY LIST FULL |||");
 
-                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(0));
-                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(1));
-                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(2));
-                    //System.out.println("Array in MainActivity ---->" + myClient.alal.get(3));
 
                     String[] words = new String[5];
                     //words[0] = "OMNOMNOM";
@@ -148,46 +161,96 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     String results = new String("");
 
+
+                    ArrayList<String> innerArrayListOfNearbyAddresses = new ArrayList<String>();
                     for(int i=0; i < myClient.alal.size(); i++)
                     {
+                        for(int j=0; j<myClient.alal.get(i).size(); j++)
+                        {
+                            innerArrayListOfNearbyAddresses.add(myClient.alal.get(i).get(j));
+                        }
+                        outerArrayListOfNearbyAddresses.add(innerArrayListOfNearbyAddresses);
+                    }
 
+
+
+
+
+
+
+
+
+
+                        //==========================================================================
+                        // OLD APPROACH - Must be replaced in order to access ALL address elements (id, price, postcode etc.)
+
+                        /*
                         ////// Print out all address elements in a list
                         for(int j = 0; j < myClient.alal.get(i).size(); j++){
                             System.out.println(words[j] + ": " + myClient.alal.get(i).get(j));
                             //results = results + (words[j] + ": " + myClient.alal.get(i).get(j) + "\n");
                         }
-                    //results = results + "XXXXXXXXXXXXXXXXXXXX \n";
+
+
                         ////// Print out postcodes in a list
                         //System.out.println("Postcode "+ i + ": " + myClient.alal.get(i).get(2));
 
-                        Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.alal.get(i).get(2)));
-                        Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.alal.get(i).get(2)));
+                        try
+                        {
+                            double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.alal.get(i).get(2)));
+                            double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.alal.get(i).get(2)));
 
-                        //LatLng nearbyLoc = new LatLng(nearbyLat,nearbyLon);
-                        //googleMap.addMarker(new MarkerOptions().position(nearbyLoc).title("" + i));
-                        //globalLoc = nearbyLoc;
-                        //onMapReady(googleMap);
+                        LatLng nearbyLatLng = new LatLng(nearbyLat, nearbyLon);
+                        arrayListOfNearbyLatLon.add(nearbyLatLng);
+
+
+
+
+                        //System.out.println("SIZE OF LATLNG LIST ---> " + arrayListOfNearbyLatLon.size());
+                        //System.out.println(arrayListOfNearbyLatLon.get(i));
+
 
 
                         System.out.println("Lat: " + nearbyLat + "\t" + "Lon: " + nearbyLon);
                         System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^");
 
-                        //addMapMarker(nearbyLat, nearbyLon);
+
+                        }
+                        catch (NumberFormatException ex)
+                        {
+                            System.out.println("X-X-X  NUMBER FORMAT EXCEPTION  X-X-X");
+                        }
+                        catch(ArrayStoreException ex)
+                        {
+                            System.out.println("X-X-X  ARRAY STORE EXCEPTION  X-X-X");
+                        }
+                        catch(IllegalArgumentException ex)
+                        {
+                            System.out.println("X-X-X  ILLEGAL ARGUMENT EXCEPTION  X-X-X");
+                        }
+                        catch(IllegalStateException ex)
+                        {
+                            System.out.println("X-X-X  ILLEGAL STATE EXCEPTION  X-X-X");
+                        }
+                        catch(NullPointerException ex)
+                        {
+                            System.out.println("X-X-X  NULL POINTER EXCEPTION  X-X-X");
+                        }
+                        catch(UnsupportedOperationException ex)
+                        {
+                            System.out.println("X-X-X  UNSUPPORTED OPERATION EXCEPTION  X-X-X");
+                        }
+
+                        */
+                        //==========================================================================
+
+
 
                     }
-                    //longitude.setText("");
-                    //latitude.setText(results);
-                    // Converting back end query results from postcode to lat/lon
-                    //Double nearbyLat = Double.parseDouble(getLatitudeFromPostcode(myClient.array[1]));
-                    //Double nearbyLon = Double.parseDouble(getLongitudeFromPostcode(myClient.array[1]));
 
-                    //System.out.println("Print out a nearby postcode >>>" + myClient.array[1]);
-                    //System.out.println("Conversion to latitude >>>" + nearbyLat);
-                    //System.out.println("Conversion to longitude >>>" + nearbyLat);
 
-                    //addMapMarker(nearbyLat, nearbyLon);
-
-                }
+                testPrint();
+                //addNearbyLocMapMarkers(outerArrayListOfNearbyAddresses);
 
 
             }
@@ -234,23 +297,74 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         ////// Request location updates from the LocationManager after location permission has been given
-        locationManager.requestLocationUpdates("gps", 2000, 0, listener);
+        locationManager.requestLocationUpdates("gps", 30000, 0, listener);
 
 
     } // End of onCreate
 
 
     ////// Add a map marker and zoom to current location
-    void addMapMarker(Double latitude, Double longitude)
+    public void addUserLocMapMarker(LatLng loc)
     {
-        //googleMap.clear();
-        LatLng loc = new LatLng(latitude, longitude);
+        googleMap.clear();
+        //LatLng loc = new LatLng(latitude, longitude);
         //LatLng foo = new LatLng(0,0);
         googleMap.addMarker(new MarkerOptions().position(loc).title("current location").visible(true));
         ////// Temporarily commented out to avoid app trying to zoom and centre on every nearby postcode
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 12));
-    } // End of addMapMarker
+    } // End of addUserLocMapMarker
+
+
+    /*
+    ////// Attempting to separate out the other markers into dedicated method
+    public void addNearbyLocMapMarkers(ArrayList<ArrayList<String>> nestedArrayList)
+    {
+
+        if (nestedArrayList.size() != 0)
+        {
+            for (int i = 0; i < outerArrayListOfNearbyAddresses.size(); i++)
+            {
+                {
+                    //googleMap.clear();
+                    googleMap.addMarker(new MarkerOptions().position(arrayList.get(i)).visible(true));
+                }
+            }
+        }
+    }
+    */
+
+
+
+    ////// Temporary method to test whether address elements are being correctly loaded into outerArrayListOfNearbyAddresses
+    public void testPrint()
+    {
+
+        if(outerArrayListOfNearbyAddresses.size() != 0)
+        {
+            /*
+            for (int i = 0; i < outerArrayListOfNearbyAddresses.size(); i++)
+            {
+                for (int j = 0; j < outerArrayListOfNearbyAddresses.get(i).size(); j++)
+                {
+                    System.out.println(outerArrayListOfNearbyAddresses.get(i).get(j));
+                }
+                System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+            }
+            */
+
+            for(int i = 0; i< outerArrayListOfNearbyAddresses.get(1).size(); i++)
+            {
+                System.out.println(outerArrayListOfNearbyAddresses.get(1).get(i));
+            }
+        }
+        else
+        {
+            System.out.println("CURRENTLY EMPTY");
+        }
+
+
+    }
 
 
     ////// Called automatically when the map is ready to use
@@ -279,7 +393,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             finish();
         }
 
-        return;
     } // End of onRequestPermissionResult
 
 
@@ -337,11 +450,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public String getLatitudeFromPostcode(String postcode)
     {
         Geocoder geoCoder = new Geocoder(MainActivity.this, Locale.getDefault());
-        List<Address> address = null;
+        List<Address> address = new ArrayList<>(); // Changed to ArrayList to try and solve map marker issue - may need to revert
         String returnResult = null;
 
-        if (geoCoder != null)
-        {
+        //if (geoCoder != null)
+        //{
             try
             {
                 address = geoCoder.getFromLocationName(postcode, 10);
@@ -357,7 +470,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 returnResult = latString;
 
             }
-        }
+        //}
         return returnResult;
     } // End of getLatitudeFromPostcode
 
@@ -365,11 +478,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public String getLongitudeFromPostcode(String postcode)
     {
         Geocoder geoCoder = new Geocoder(MainActivity.this, Locale.getDefault());
-        List<Address> address = null;
+        List<Address> address = new ArrayList<>(); // Changed to ArrayList to try and solve map marker issue - may need to revert
         String returnResult = null;
 
-        if (geoCoder != null)
-        {
+        //if (geoCoder != null)
+        //{
             try
             {
                 address = geoCoder.getFromLocationName(postcode, 10);
@@ -384,7 +497,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String lonString = Double.toString(lon);
                 returnResult = lonString;
             }
-        }
+        //}
         return returnResult;
     } // End of getLongitudeFromPostcode
 
@@ -392,11 +505,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public String getPostcodeFromLatLon(double latitude, double longitude)
     {
         Geocoder geoCoder = new Geocoder(MainActivity.this, Locale.getDefault());
-        List<Address> address = null;
+        List<Address> address = new ArrayList<>(); // Changed to ArrayList to try and solve map marker issue - may need to revert
         String returnResult = null;
 
-        if (geoCoder != null)
-        {
+        //if (geoCoder != null)
+        //{
             try
             {
                 address = geoCoder.getFromLocation(latitude, longitude, 5); // 5 indicates the number of results (houses) for that postcode
@@ -406,10 +519,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             if (address.size() > 0)
             {
-                returnResult = address.get(2).getPostalCode().toString();
+                returnResult = address.get(2).getPostalCode();
                 //return address.size();
             }
-        }
+        //}
         return returnResult;
     } // End of getPostcodeFromLatLon
 
