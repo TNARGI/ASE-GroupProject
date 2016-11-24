@@ -26,6 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -64,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     ////// Array list to store back end results in full address format
-    public static ArrayList<ArrayList<String>> outerArrayListOfNearbyAddresses = new ArrayList<>();
+    public ArrayList<ArrayList<String>> outerArrayListOfNearbyAddresses = new ArrayList<>();
+    public ArrayList<ArrayList<String>> alal = new ArrayList<>();
 
 
     @Override
@@ -160,17 +162,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     words[4] = "date";
 
                     String results = new String("");
-
-
+                    /*
+                    System.out.println("Building Array List!");
                     ArrayList<String> innerArrayListOfNearbyAddresses = new ArrayList<String>();
                     for(int i=0; i < myClient.alal.size(); i++)
                     {
+                        System.out.println("i = " + i + "; alal size = " + myClient.alal.size());
                         for(int j=0; j<myClient.alal.get(i).size(); j++)
                         {
+                            System.out.println("i = " + i + "; j = " + j + "; alal(i) size = " + myClient.alal.get(i).size());
+                            System.out.println(myClient.alal.get(i).get(j));
                             innerArrayListOfNearbyAddresses.add(myClient.alal.get(i).get(j));
                         }
                         outerArrayListOfNearbyAddresses.add(innerArrayListOfNearbyAddresses);
+                        System.out.println("inner: " + innerArrayListOfNearbyAddresses);
+                        innerArrayListOfNearbyAddresses.clear();
                     }
+                    for(int z = 0; z < outerArrayListOfNearbyAddresses.size(); z++){
+                        System.out.println("outer " + z + ": " + outerArrayListOfNearbyAddresses.get(z));
+                    }
+                    */
+                    alal = myClient.getAlal();
+                    for(int i = 0; i < alal.size(); i++){
+                        for(int j = 0; j < alal.get(i).size(); j ++){
+                            System.out.println(alal.get(i).get(j));
+                        }
+                    }
+
 
 
 
@@ -249,8 +267,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
 
 
-                testPrint();
-                //addNearbyLocMapMarkers(outerArrayListOfNearbyAddresses);
+                //testPrint();
+                addNearbyLocMapMarkers();
 
 
             }
@@ -297,7 +315,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         ////// Request location updates from the LocationManager after location permission has been given
-        locationManager.requestLocationUpdates("gps", 30000, 0, listener);
+        locationManager.requestLocationUpdates("gps", 60000, 0, listener);
 
 
     } // End of onCreate
@@ -309,53 +327,86 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.clear();
         //LatLng loc = new LatLng(latitude, longitude);
         //LatLng foo = new LatLng(0,0);
-        googleMap.addMarker(new MarkerOptions().position(loc).title("current location").visible(true));
+        googleMap.addMarker(new MarkerOptions()
+                .position(loc)
+                .title("current location")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .visible(true));
         ////// Temporarily commented out to avoid app trying to zoom and centre on every nearby postcode
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 12));
     } // End of addUserLocMapMarker
 
 
-    /*
+
     ////// Attempting to separate out the other markers into dedicated method
-    public void addNearbyLocMapMarkers(ArrayList<ArrayList<String>> nestedArrayList)
+    public void addNearbyLocMapMarkers()
     {
 
-        if (nestedArrayList.size() != 0)
+        if (alal.size() != 0)
         {
-            for (int i = 0; i < outerArrayListOfNearbyAddresses.size(); i++)
+            for (int i = 0; i < 50; i++) // Currently set to 10 so as not to overload app. Should be i < alal.size()
             {
                 {
                     //googleMap.clear();
-                    googleMap.addMarker(new MarkerOptions().position(arrayList.get(i)).visible(true));
+                    String tPostcode = alal.get(i).get(2);
+                    String tPrice = alal.get(i).get(1);
+                    double tLat = getLatitudeFromPostcode(tPostcode);
+                    double tLon = getLongitudeFromPostcode(tPostcode);
+                    LatLng tLL = new LatLng(tLat,tLon);
+
+                    if(Integer.parseInt(tPrice) < 250000)
+                    {
+                        googleMap.addMarker(new MarkerOptions()
+                                .position(tLL)
+                                .title("Postcode: " + alal.get(i).get(2) + ", " + "Price: £" + alal.get(i).get(1))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                                .visible(true));
+                    }
+                    else if(Integer.parseInt(tPrice) < 500000)
+                    {
+                        googleMap.addMarker(new MarkerOptions()
+                                .position(tLL)
+                                .title("Postcode: " + alal.get(i).get(2) + ", " + "Price: £" + alal.get(i).get(1))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                                .visible(true));
+                    }
+                    else
+                    {
+                        googleMap.addMarker(new MarkerOptions()
+                                .position(tLL)
+                                .title("Postcode: " + alal.get(i).get(2) + ", " + "Price: £" + alal.get(i).get(1))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                                .visible(true));
+                    }
+
                 }
             }
         }
+        else
+        {
+            System.out.println("alal EMPTY");
+        }
     }
-    */
 
 
 
+    /*
     ////// Temporary method to test whether address elements are being correctly loaded into outerArrayListOfNearbyAddresses
     public void testPrint()
     {
 
         if(outerArrayListOfNearbyAddresses.size() != 0)
         {
-            /*
+
             for (int i = 0; i < outerArrayListOfNearbyAddresses.size(); i++)
             {
                 for (int j = 0; j < outerArrayListOfNearbyAddresses.get(i).size(); j++)
                 {
                     System.out.println(outerArrayListOfNearbyAddresses.get(i).get(j));
+                    System.out.println(i + " " + j);
                 }
                 System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-            }
-            */
-
-            for(int i = 0; i< outerArrayListOfNearbyAddresses.get(1).size(); i++)
-            {
-                System.out.println(outerArrayListOfNearbyAddresses.get(1).get(i));
             }
         }
         else
@@ -365,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     }
+    */
 
 
     ////// Called automatically when the map is ready to use
@@ -447,11 +499,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     ////// POSTCODE HANDLING METHODS ///////////////////////////////////////////////////////////////
-    public String getLatitudeFromPostcode(String postcode)
+    public double getLatitudeFromPostcode(String postcode)
     {
         Geocoder geoCoder = new Geocoder(MainActivity.this, Locale.getDefault());
         List<Address> address = new ArrayList<>(); // Changed to ArrayList to try and solve map marker issue - may need to revert
         String returnResult = null;
+        double lat = 0.0;
 
         //if (geoCoder != null)
         //{
@@ -465,21 +518,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (address.size() > 0)
             {
                 Address first = address.get(0);
-                double lat = first.getLatitude();
+                lat = first.getLatitude();
                 String latString = Double.toString(lat);
                 returnResult = latString;
 
             }
         //}
-        return returnResult;
+        //return returnResult;
+        return lat;
     } // End of getLatitudeFromPostcode
 
 
-    public String getLongitudeFromPostcode(String postcode)
+    public double getLongitudeFromPostcode(String postcode)
     {
         Geocoder geoCoder = new Geocoder(MainActivity.this, Locale.getDefault());
         List<Address> address = new ArrayList<>(); // Changed to ArrayList to try and solve map marker issue - may need to revert
         String returnResult = null;
+        double lon = 0.0;
 
         //if (geoCoder != null)
         //{
@@ -493,12 +548,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (address.size() > 0)
             {
                 Address first = address.get(0);
-                double lon = first.getLongitude();
+                lon = first.getLongitude();
                 String lonString = Double.toString(lon);
                 returnResult = lonString;
             }
         //}
-        return returnResult;
+        //return returnResult;
+        return lon;
     } // End of getLongitudeFromPostcode
 
 

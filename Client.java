@@ -137,4 +137,8 @@ public class Client extends AsyncTask<Void, Void, Void>
     }
 
 
+    public static ArrayList<ArrayList<String>> getAlal()
+    {
+        return alal;
+    }
 }
