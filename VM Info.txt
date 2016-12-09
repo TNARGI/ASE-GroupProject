@@ -1,0 +1,4 @@
+instance-1.rdp
+
+username: mehmetparlak90
+password: [$(V0^gF(:*NEyl
